@@ -1,0 +1,22 @@
+# Geheimnisse und lokale Daten - nie committen
+.env
+.env.*
+!.env.example
+data/
+*.log
+*.db
+*.sqlite*
+
+# Python / Werkzeuge
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# grosse Testdateien
+tests/fixtures/*.mp4

@@ -1,0 +1,25 @@
+<div class="tiles">
+{% for t in tiles %}
+  <div class="tile" data-sid="{{ t.s.id }}">
+    <a href="{{ 'https://kick.com/' if t.s.platform == 'kick' else 'https://twitch.tv/' }}{{ t.s.login }}" target="_blank" rel="noopener">
+      {% if t.live %}<img src="/snap/{{ t.s.id }}.jpg?{{ range(100000)|random }}" alt="{{ t.s.display }}" onerror="this.outerHTML='<div class=noimg>kein Standbild</div>'">
+      {% else %}<div class="noimg">offline</div>{% endif %}
+    </a>
+    <div class="meta">
+      <span><span class="dot {{ 'live' if t.live }}"></span>{{ t.s.display }}{% if t.since %} <span class="muted">seit {{ t.since }}</span>{% endif %}</span>
+      {% if loop.index <= 9 %}<span class="key">{{ loop.index }}</span>{% endif %}
+    </div>
+    <div class="meta">
+      {% set pts = t.spark %}{% set mx = (pts|max if pts else 1) or 1 %}
+      <svg width="120" height="24" viewBox="0 0 120 24" aria-label="Chat-Rate">
+        <polyline fill="none" stroke="#ff3d7f" stroke-width="1.5"
+          points="{% for v in pts %}{{ (loop.index0 * 120 / 35)|round(1) }},{{ (22 - v * 20 / mx)|round(1) }} {% endfor %}"/>
+      </svg>
+      <span class="muted">z <b data-z="{{ t.s.id }}" style="color:var(--text)">{{ "%.1f"|format(t.z) }}</b></span>
+      <button class="small primary" hx-post="/api/clip/{{ t.s.id }}" hx-swap="none">Clip jetzt</button>
+    </div>
+  </div>
+{% else %}
+  <p class="muted">Keine Streamer in streamers.yaml.</p>
+{% endfor %}
+</div>

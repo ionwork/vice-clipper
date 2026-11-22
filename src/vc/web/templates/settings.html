@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="panel" style="max-width:560px">
+  <h2>Einstellungen <span class="muted">· schreibt config.yaml, laufende Teile übernehmen sofort</span></h2>
+  {% if saved %}<p class="flash">Gespeichert.</p>{% endif %}
+  <form method="post">
+    <table>
+    {% for key, label, typ, val in rows %}
+      <tr><td>{{ label }}<br><span class="muted">{{ key }}</span></td>
+        <td>{% if typ.__name__ == "bool" %}<input type="checkbox" name="{{ key }}" {{ "checked" if val }}>
+            {% else %}<input type="number" step="any" name="{{ key }}" value="{{ val }}">{% endif %}</td></tr>
+    {% endfor %}
+    </table>
+    <p><button class="primary" type="submit">Speichern</button></p>
+  </form>
+</section>
+{% endblock %}

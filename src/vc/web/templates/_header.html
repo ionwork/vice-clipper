@@ -1,0 +1,9 @@
+<div class="hdr">
+  <span>Gemini heute <b>{{ "%.3f"|format(h.usd) }} $</b> / {{ h.budget }} $</span>
+  <span>Auto <b>{{ "an" if h.auto else "aus" }}</b></span>
+  <span>Pause <b>{{ "ja" if h.paused else "nein" }}</b></span>
+  {% if h.hb %}<span>Recorder <b>{{ h.hb.recorders }}</b></span>
+  <span>Warteschlange <b>{{ h.hb.queue }}</b></span>
+  <span>Letzte Stunde <b>{{ h.hb.last_hour }}</b></span>{% endif %}
+  {% if not h.runtime %}<span style="color:var(--warn)">nur Datenbank (für Live: <code>vc run</code>)</span>{% endif %}
+</div>

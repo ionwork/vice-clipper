@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}vice-clipper{% endblock %}</title>
+<script src="/static/htmx.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0f12; --panel: #15181d; --line: #252a32; --text: #e6e8eb; --muted: #8a93a0;
+    --accent: #ff3d7f; --ok: #3ddc84; --warn: #ffb547; --bad: #ff5c5c; --hl: #ffe500;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: inherit; }
+  nav { display: flex; gap: 18px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  nav b { color: var(--accent); letter-spacing: .04em; }
+  nav a { color: var(--muted); text-decoration: none; } nav a:hover, nav a.on { color: var(--text); }
+  main { padding: 14px 16px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .tile { background: #0a0c0f; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .tile img, .tile .noimg { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #050607; }
+  .tile .noimg { display: grid; place-items: center; color: var(--muted); }
+  .tile .meta { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: #444; margin-right: 6px; }
+  .dot.live { background: var(--bad); }
+  .key { color: var(--muted); font-size: 11px; border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+  button, .btn { background: #222832; color: var(--text); border: 1px solid #2f3642; border-radius: 4px; padding: 3px 8px; font: inherit; cursor: pointer; }
+  button:hover { border-color: var(--muted); } button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.small { padding: 1px 6px; font-size: 12px; }
+  #events { height: 70vh; overflow-y: auto; font: 12px/1.45 ui-monospace, Consolas, monospace; }
+  #events div { padding: 2px 0; border-bottom: 1px solid #1b1f25; }
+  .k-trigger { color: var(--hl); } .k-judged { color: #8fd3ff; } .k-rendered, .k-delivered, .k-posted { color: var(--ok); }
+  .k-error, .k-judge_fallback, .k-recorder_error { color: var(--bad); }
+  table { width: 100%; border-collapse: collapse; } th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  th { color: var(--muted); font-weight: 500; font-size: 11px; }
+  .st { font-size: 11px; padding: 1px 6px; border-radius: 10px; background: #222; }
+  .st-RENDERED { background: #1d3b2a; color: var(--ok); } .st-REJECTED, .st-FAILED { background: #3b1d1d; color: var(--bad); }
+  .st-DELIVERED, .st-POSTED { background: #1d2a3b; color: #8fd3ff; } .st-NEW, .st-JUDGED, .st-CAPTIONED { background: #3b331d; color: var(--warn); }
+  .hype { font-weight: 700; } .muted { color: var(--muted); }
+  .hdr { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; color: var(--muted); }
+  .hdr b { color: var(--text); }
+  video { width: 160px; border-radius: 4px; background: #000; }
+  input[type=number], input[type=text] { background: #0a0c0f; color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; width: 110px; }
+  .flash { color: var(--ok); }
+</style>
+</head>
+<body>
+<nav><b>VICE CLIPPER</b>
+  <a href="/" class="{% if request.url.path == '/' %}on{% endif %}">Live</a>
+  <a href="/streamers" class="{% if request.url.path == '/streamers' %}on{% endif %}">Streamer</a>
+  <a href="/settings" class="{% if request.url.path == '/settings' %}on{% endif %}">Einstellungen</a>
+</nav>
+<main>{% block body %}{% endblock %}</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

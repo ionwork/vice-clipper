@@ -1,0 +1,20 @@
+<table>
+<tr><th>Vorschau</th><th>Clip</th><th>Hype</th><th>Kategorie</th><th>Status</th><th></th></tr>
+{% for c in clips %}
+<tr>
+  <td>{% if c.status.value in ("RENDERED", "DELIVERED", "POSTED") %}<video src="/clips/{{ c.id }}/preview" preload="none" controls muted></video>{% else %}<span class="muted">–</span>{% endif %}</td>
+  <td><b>{{ c.id }}</b><br><span class="muted">{{ c.streamer_id }} · {{ c.source.value }} · {{ c.created_at.astimezone().strftime("%H:%M") if c.created_at }}</span>
+      {% if c.judge %}<br>{{ c.judge.hook }}{% endif %}</td>
+  <td class="hype">{{ c.hype if c.hype is not none else "–" }}<br><span class="muted">pre {{ "%.1f"|format(c.pre_score) }}</span></td>
+  <td>{{ c.judge.category if c.judge else "" }}<br><span class="muted">{{ c.layout }}</span></td>
+  <td><span class="st st-{{ c.status.value }}">{{ c.status.value }}</span>{% if c.reason %}<br><span class="muted">{{ c.reason[:50] }}</span>{% endif %}</td>
+  <td style="white-space:nowrap">
+    {% if c.status.value in ("RENDERED", "DELIVERED") %}<button class="small" hx-post="/api/clips/{{ c.id }}/deliver" hx-swap="none">Liefern</button>{% endif %}
+    {% if c.judge %}{% for l in layouts if l != c.layout %}<button class="small" hx-post="/api/clips/{{ c.id }}/rerender?layout={{ l }}" hx-swap="none">{{ l }}</button>{% endfor %}{% endif %}
+    {% if c.status.value not in ("REJECTED", "POSTED") %}<button class="small" hx-post="/api/clips/{{ c.id }}/reject" hx-swap="none" hx-on::after-request="htmx.trigger('#clips','refresh')">Verwerfen</button>{% endif %}
+  </td>
+</tr>
+{% else %}
+<tr><td colspan="6" class="muted">Noch keine Kandidaten.</td></tr>
+{% endfor %}
+</table>

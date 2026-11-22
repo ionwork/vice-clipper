@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block body %}
+<p class="muted">Rahmen mit der Maus über die Facecam ziehen, dann Speichern. Koordinaten beziehen sich auf das 1920×1080-Normbild.</p>
+{% for s in streamers %}
+<section class="panel cam-editor" data-sid="{{ s.id }}" data-cam='{{ s.cam.model_dump()|tojson if s.cam else "null" }}' style="margin-bottom:14px">
+  <h2>{{ s.display }} <span class="muted">· {{ s.platform }} · {{ s.lang }} · {{ s.account }} · Erlaubnis: {{ s.permission }}</span></h2>
+  <div class="stage" style="position:relative;width:960px;max-width:100%;aspect-ratio:16/9;background:#050607;cursor:crosshair;user-select:none">
+    <img src="/api/streamers/{{ s.id }}/frame.jpg" alt="" draggable="false" style="width:100%;height:100%;object-fit:fill;display:block"
+         onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'noimg',textContent:'kein Standbild (Streamer offline, noch kein Clip)',style:'position:absolute;inset:0;display:grid;place-items:center;color:#8a93a0'}))">
+    <div class="rect" style="position:absolute;border:2px solid #ffe500;background:rgba(255,229,0,.12);display:none;pointer-events:none"></div>
+  </div>
+  <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+    <button class="primary save">Speichern</button><button class="suggest">Vorschlag</button><button class="clear">Keine Cam</button>
+    <span class="out muted"></span>
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

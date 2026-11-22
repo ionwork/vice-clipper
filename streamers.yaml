@@ -1,0 +1,10 @@
+# Optional. WELCHE Streamer ueberwacht werden, steht nur in .env (STREAMERS=...).
+# Hier kannst du fuer einen Streamer aus .env Details ergaenzen, vor allem den Facecam-Rahmen.
+# Den Rahmen kannst du auch im Dashboard (uv run vc start -> http://127.0.0.1:8000) aufziehen.
+#
+# Beispiel (id = Login aus .env):
+#   - id: dein_streamer
+#     quality: "1080p60,1080p,best"
+#     priority: 1                         # 1 = immer aufnehmen, 3 = nur wenn Bandbreite frei
+#     cam: {x: 0, y: 720, w: 480, h: 360} # Pixel im 1920x1080-Bild, null = automatisch suchen
+streamers: []

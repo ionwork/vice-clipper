@@ -1,0 +1,169 @@
+paths: {data: data, fonts: assets/fonts, sfx: assets/sfx}
+
+recorder:
+  segment_seconds: 4
+  buffer_seconds: 300
+  max_parallel: 8
+
+trigger:
+  burst_window_s: 5
+  baseline_window_s: 180
+  z_threshold: 4.0
+  min_burst_msgs: 15
+  min_unique_ratio: 0.6
+  lexicon_ratio_bonus: 0.35
+  clip_call_count: 3
+  cooldown_s: 45
+  pre_roll_s: 28
+  post_roll_s: 10
+  audio_spike_db: 8
+  min_pre_score: 5.0
+
+lexicon:
+  common: [KEKW, LUL, LULW, OMEGALUL, LMAO, LMFAO, WTF, POG, POGGERS, W, "NO WAY", NAHH, HOLY, BRO, ICANT, "💀", "😂"]
+  en: [clip, "clip it", "clip that", insane, crazy, "what was that", "no shot"]
+  de: [HAHAHA, digga, alter, krass, "was zum", "clippt das", "clip das", safe, "niemals"]
+
+chat:
+  log: true
+  kick_enabled: true
+  # Kick Pusher app key + cluster (Kick hat ihn im Okt. 2026 gewechselt). Bei Fehler 4001 neuen Key aus einer gepflegten Kick-Chat-Bibliothek holen
+  kick_pusher_key: "34bf7a0ff419a2a775b9"
+  kick_pusher_cluster: "us2"
+  # Bots, Befehle und Kopier-Wellen zaehlen nicht als Zuschauer (Nachrichten mit ! ausser !clip ebenfalls nicht)
+  ignore_users: [nightbot, streamelements, moobot, fossabot, streamlabs, soundalerts, wizebot, sery_bot]
+  ignore_patterns: ['(?i)\b(giveaway|gewinnspiel|raid)\b']
+
+judge:
+  provider: ollama                 # ollama = lokal und kostenlos | gemini = Google-API (kostet)
+  ollama_url: http://127.0.0.1:11434
+  ollama_model: gemma3:12b         # braucht Bild-Verstaendnis (vision); groessere Modelle brauchen mehr Grafikspeicher
+  ollama_num_ctx: 8192
+  ollama_keep_alive: 15m           # Modell bleibt so lange im Grafikspeicher
+  ollama_timeout_s: 600
+  local_frames: 12                 # Standbilder pro Kandidat
+  model: gemini-3.5-flash-lite     # nur bei provider: gemini
+  min_hype: 7
+  proxy_height: 480
+  proxy_fps: 10
+  max_parallel: 1                  # lokal: 1 (eine Grafikkarte), gemini: 2
+  daily_budget_usd: 10
+  price_in_per_m: 0.30             # $ pro 1 Mio Eingabe-Tokens (ai.google.dev/pricing pruefen)
+  price_out_per_m: 2.50            # $ pro 1 Mio Ausgabe-Tokens
+  allow_gta5: true                 # Probe-Modus. Zum Launch: uv run vc launch (oder /launch in Telegram)
+  allow_irl: true                  # Echt-Leben-Szenen (Just Chatting, IRL) der eingetragenen Streamer sind gueltige Clips
+
+render:
+  width: 1080
+  height: 1920
+  split_cam_height: 960              # 960 = Facecam obere 50 %, Gameplay untere 50 % (768 = 40/60)
+  force_layout: ""                 # leer = Regel nach Inhalt (Echt-Leben -> irl, Gameplay -> split 50/50); sonst split | gameplay | fullcam | irl erzwingen
+  irl_categories: ["Just Chatting", "IRL", "Travel & Outdoors", "Food & Drink", "Music", "Talk Shows & Podcasts"]  # Twitch-Kategorien = Echt-Leben
+  auto_cam: true                   # kein Cam-Rahmen hinterlegt -> Facecam pro Clip automatisch suchen
+  min_len_s: 10
+  max_len_s: 25
+  encoder: auto                    # auto | h264_nvenc | h264_videotoolbox | libx264
+  loudness_lufs: -14
+  max_file_mb: 49
+
+captions:
+  whisper_model: large-v3-turbo
+  device: auto
+  max_words: 3
+  max_chars: 16
+  highlight_color: "FFE500"
+  censor: false
+  initial_prompt: "GTA 6, Vice City, Leonida, Jason, Lucia, chat, bro"
+
+harvest:
+  game_names: ["Grand Theft Auto V"]   # vc launch stellt auf ["Grand Theft Auto VI"] um
+  poll_seconds: 180
+  lookback_minutes: 90
+  min_views: 150
+  top_n: 5
+  languages: [en, de]
+  only_whitelisted: true           # nur Clips der Streamer aus .env werden zu Kandidaten
+  max_duration_s: 60
+  account_by_lang: {en: account_en, de: account_de}
+
+vod:
+  model: ""                        # leer = judge.model
+  chunk_minutes: 40
+  min_hype: 7
+  max_moments: 12
+
+delivery:
+  mode: window                     # window = alle window_minutes die besten 2-3 Clips nach Viralitaet V | gap = ein Clip alle min_gap_minutes
+  window_minutes: 15               # Fenster laufen ab Pipeline-Start
+  per_window_min: 2                # so viele Clips pro Fenster, wenn genug mit V >= min_v da sind
+  per_window_max: 3
+  third_clip_min_v: 55             # ein dritter Clip nur ab diesem V
+  min_v: 35                        # darunter nie liefern, auch nicht als Fueller
+  max_per_streamer: 2              # pro Fenster und Streamer (gilt nicht, wenn nur einer live ist)
+  age_decay_per_5min: 1            # V-Abzug pro 5 min fuer Clips aus einem frueheren Fenster
+  render_boost_minute: 10          # ab dieser Fenster-Minute rendern die besten JUDGED-Kandidaten zuerst
+  render_boost_top: 3
+  render_max: 5                    # gerendert werden nur die besten 5 offenen Kandidaten nach V (Hotkey-Clips immer)
+  delete_losers: true              # Fensterende: nicht gewaehlte Clips -> REJECTED, Videos/Untertitel geloescht, DB-Zeile bleibt (fuer vc tune)
+  min_gap_minutes: 3               # nur mode: gap. 3 = ca. 5 Clips pro 15 min, 1.5 = ca. 10
+  stale_after_minutes: 45
+  auto: true                       # an = Lieferung nach Takt, aus = nur /next oder Lieferknopf. Launch: erst an, wenn die ersten 10 Clips gut waren
+  paused: false
+  send_as_video: true              # Clip als abspielbares Video (false = als Datei)
+  follow_slots: false              # true = nur liefern, wenn der Account posten darf (50 min Abstand). Auto-Lieferung nur, wenn der Account des Clips jetzt posten darf (jede Nachricht = sofort posten)
+  campaign_bonus: 2                # Streamer mit permission: campaign (Bezahlung pro View) kommen zuerst
+
+virality:                          # V (0-100) = gewichteter Schnitt der verfuegbaren Komponenten (je 0..1), V2
+  # velocity = Chat-Spike (z), reaction = max(Lachen, Schock, Hype, Cringe, ???) als Lift gegen den eigenen Kanal,
+  # library = Zuschauer-Clips, clip_calls = "clip that"-Rufe, judge = KI-Hype, convergence = alle schreiben dasselbe,
+  # voice = Lautstaerke/Sprechtempo/Schluesselwoerter des Streamers, intensity = CAPS/!!!/gedehnte Woerter.
+  # Startgewichte = begruendete Annahmen; uv run vc tune prueft sie gegen echte Twitch-Clips (--apply schreibt hierher)
+  weights: {velocity: 0.20, reaction: 0.18, library: 0.18, clip_calls: 0.13, judge: 0.13, convergence: 0.07, voice: 0.07, intensity: 0.04}
+  reaction_min_users: 4            # Kategorie/Intensitaet zaehlt erst ab 4 verschiedenen Nutzern im Burst
+  convergence_min_users: 5         # convergence erst ab 5 verschiedenen Nutzern mit demselben Token/Emote
+  log_span: 3.0                    # convergence/intensity = clamp(log2(Lift) / 3): Lift 8x = voll
+  streamer_clipcall_users: 3       # Streamer sagt selbst "clip das" = zaehlt wie 3 Nutzer
+  voice_pace_full: 2.5             # Sprechtempo-Sprung (schnellste 3 s / Median), der als voll zaehlt
+  voice_keyword_bonus: 0.2         # + bei Schluesselwort im Transkript
+  voice_silence_bonus: 0.1         # + bei Stille >= voice_silence_s nach der lautesten Stelle
+  voice_silence_s: 2.5
+  voice_keywords:
+    de: [oh mein gott, hast du das gesehen, clip das, clippt das, alter, was zum]
+    en: [oh my god, did you see that, clip that, clip it, no way, what the]
+  categories:                      # Reaktions-Kategorien: Woerter (de+en, Gross/klein egal), Emotes, Emojis, Regex
+    laugh: {words: [lmao, lol, lul, xd, haha, hahaha, rofl], emotes: [LUL, LULW, KEKW, OMEGALUL, ICANT, KEKL, pepeLaugh], emojis: ["😂", "🤣", "💀", "😭", "☠️"], regex: ['(?i)\b(ha){2,}h?\b']}
+    shock: {words: [wtf, wth, what, no way, huh, bro, was zum, alter, omg, junge], emotes: [monkaS, monkaW, "D:", WAYTOODANK], emojis: ["😱", "😳", "🤯"]}
+    hype: {words: [pog, poggers, "let's go", lets go, gg, w, sheesh, insane], emotes: [PogChamp, Pog, POGGERS, PogU, EZ], emojis: ["🔥"]}
+    cringe: {words: [cringe, yikes, fremdschämen], emotes: [Pepepains, WeirdChamp, monkaHmm], emojis: ["😬"]}
+    confusion: {regex: ['^[\s?]*\?[\s?]*$']}   # Nachricht besteht nur aus Fragezeichen
+  z_floor: 3.0                     # velocity = clamp((z - 3) / 7), z relativ zur eigenen Chat-Baseline
+  z_span: 7.0
+  reaction_emojis: ["😂", "🤣", "💀", "☠️", "😭"]   # jede Nachricht zaehlt hoechstens einmal
+  reaction_emotes: [KEKW, LUL, LULW, OMEGALUL, ICANT]
+  reaction_patterns: ['(?i)\b(ha){2,}h?\b', '(?i)\bxd+\b']
+  clipcall_phrases: [clip, clip it, clip that, clippt das, clip das]
+  link_pattern: 'clips\.twitch\.tv/|twitch\.tv/\w+/clip/|kick\.com/\w+/clips?/'
+  reaction_base_min: 0.02          # Mindest-Baseline-Anteil fuer alle Lifts (Reaktion, Intensitaet, Konvergenz)
+  reaction_log_span: 3.0           # reaction = clamp(log2(Lift) / 3): Lift 8x = 1.0
+  clipcall_window_s: [-15, 30]     # "clip"-Rufe eindeutiger Nutzer in [t-15 s, t+30 s]
+  clipcall_scale: 4.0              # clip_calls = 1 - exp(-n / 4)
+  library_window_s: [-20, 240]     # Twitch-Clips und Clip-Links in [t-20 s, t+240 s]
+  library_rate_days: 7             # uebliche Clip-Rate des Kanals aus den letzten 7 Tagen
+  library_expected_min: 0.25
+  library_link_weight: 0.5
+  library_log_span: 3.0
+  velocity_quantile: 0.9           # schnellster passender Clip im oberen 10 %-Quantil -> +0.15
+  velocity_min_clips: 5
+  velocity_bonus: 0.15
+  audio_full_db: 15.0              # Lautstaerke-Teil von voice = clamp(dB ueber Baseline / 15)
+  agree_min_components: 3          # >= 3 Komponenten >= 0.6 -> V x 1.10
+  agree_level: 0.6
+  agree_factor: 1.10
+  needs_context_penalty: 15
+  judge_queue_max: 6               # mehr NEW-Kandidaten als das -> alle mit V < judge_min ohne Judge verwerfen
+  judge_min: 25
+
+accounts:
+  account_en: {min_gap_minutes: 50, daily_cap: 12}
+  account_de:  {min_gap_minutes: 50, daily_cap: 12}
+  account_other:        {min_gap_minutes: 50, daily_cap: 12}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block body %}
+<div id="hdr" hx-get="/partials/header" hx-trigger="every 10s">{% include "_header.html" %}</div>
+<div class="grid">
+  <div>
+    <section class="panel" style="margin-bottom:14px">
+      <h2>Kanäle <span class="muted">· Tasten 1–9 = Clip jetzt</span></h2>
+      <div id="tiles" hx-get="/partials/tiles" hx-trigger="every 10s">{% include "_tiles.html" %}</div>
+    </section>
+    <section class="panel">
+      <h2>Kandidaten
+        <select name="status" hx-get="/partials/clips" hx-target="#clips" style="margin-left:8px">
+          <option value="">alle</option><option>RENDERED</option><option>NEW</option><option>JUDGED</option>
+          <option>DELIVERED</option><option>POSTED</option><option>REJECTED</option><option>FAILED</option>
+        </select>
+      </h2>
+      <div id="clips" hx-get="/partials/clips" hx-trigger="load, every 6s, refresh" hx-include="[name=status]"></div>
+    </section>
+  </div>
+  <section class="panel"><h2>Ereignisse</h2><div id="events"></div></section>
+</div>
+{% endblock %}
